@@ -1,14 +1,20 @@
 import 'dart:ffi';
 
+import 'package:finanzas_personales/model/account.dart';
 import 'package:finanzas_personales/model/account_type.dart';
+import 'package:finanzas_personales/views/edit_account/controller/edit_account_controller.dart';
 import 'package:finanzas_personales/views/new_account/controller/new_account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class NewAccount extends GetView<NewAccountController> {
-  int accountType;
-  NewAccount({required this.accountType, Key? key}) : super(key: key);
-  var _controller = Get.put(NewAccountController());
+class EditAccount extends GetView<EditAccountController> {
+  Account account;
+  var _controller = Get.put(EditAccountController());
+  EditAccount({required this.account, Key? key}) : super(key: key) {
+    _controller.accountBalance.text = account.balance.toString();
+    _controller.accountNameController.text = account.name.toString();
+    _controller.accountPlanned.text = account.planned.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +23,14 @@ class NewAccount extends GetView<NewAccountController> {
         actions: [
           IconButton(
               onPressed: () {
-                controller.addNewAccount(accountType);
+                controller.editAccount(
+                    accountType: account.typeId, id: account.id);
               },
               icon: Icon(Icons.save))
         ],
-        title: Text("Agregar Cuenta"),
+        title: Text("Editar Cuenta"),
       ),
-      body: GetBuilder<NewAccountController>(builder: (_mc) {
+      body: GetBuilder<EditAccountController>(builder: (_mc) {
         return Container(
           child: Column(children: [
             Container(
@@ -65,7 +72,7 @@ class NewAccount extends GetView<NewAccountController> {
             //     ],
             //   ),
             // ),
-            if (accountType != 4)
+            if (account.typeId != 4)
               Container(
                 margin: const EdgeInsets.all(10),
                 child: Row(
@@ -84,25 +91,25 @@ class NewAccount extends GetView<NewAccountController> {
                   ],
                 ),
               ),
-            if (accountType == 4)
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: controller.accountBalance,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Balance',
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller.accountBalance,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Balance',
                       ),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
           ]),
         );
       }),

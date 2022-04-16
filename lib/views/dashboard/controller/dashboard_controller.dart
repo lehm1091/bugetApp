@@ -6,7 +6,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
+  double totalWallets = 0;
+  double totalExpended = 0;
+  double totalPlanned = 0;
+  double libre = 0;
   final accountBox = objectbox.store.box<Account>();
+
+  List<Account> wallets = [];
+  List<Account> expends = [];
+
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+    await getData();
+  }
+
+  Future<void> getData() async {
+    wallets = getWallets();
+    expends = getExpendedAccounts();
+  }
+
   List<Account> getAll() {
     return accountBox.getAll();
   }
@@ -16,6 +35,28 @@ class DashboardController extends GetxController {
     return query.find();
   }
 
+  List<Account> getWallets() {
+    List<Account> wallets = getByAccountType(4);
+    totalWallets = 0;
+    wallets.forEach((element) {
+      totalWallets += element.balance;
+    });
+    update();
+    return wallets;
+  }
+
+  List<Account> getExpendedAccounts() {
+    List<Account> expends = getByAccountType(1);
+    totalPlanned = 0;
+    totalExpended = 0;
+    expends.forEach((element) {
+      totalPlanned += element.planned;
+      totalExpended += element.balance;
+    });
+    update();
+    return expends;
+  }
+
   RxList<Account> accountsList = <Account>[
     Account(balance: 70, name: "Prueba1", planned: 100.0, typeId: 1),
     Account(balance: 200, name: "Prueba2", planned: 200.0, typeId: 1),
@@ -23,14 +64,18 @@ class DashboardController extends GetxController {
     Account(balance: 40, name: "Prueba4", planned: 300.0, typeId: 1),
     Account(balance: 305, name: "Prueba5", planned: 300.0, typeId: 1)
   ].obs;
-  onAddButtonPress() {
+  onAddButtonPress(int accountType) {
     print("pressed");
-    Get.to(() => NewAccount());
+
+    Get.to(() => NewAccount(
+          accountType: accountType,
+        ));
   }
 
   void removeAccount(Account item) {
     print("removed");
     accountBox.remove(item.id);
+    getData();
     update();
   }
 }

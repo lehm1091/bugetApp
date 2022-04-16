@@ -8,34 +8,29 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class NewAccountController extends GetxController {
+class EditAccountController extends GetxController {
   var dashController = Get.put(DashboardController());
   TextEditingController accountNameController = new TextEditingController();
   TextEditingController accountPlanned = new TextEditingController(text: '0.0');
   TextEditingController accountBalance = new TextEditingController(text: '0.0');
 
   final accountBox = objectbox.store.box<Account>();
-  List<DropdownMenuItem<int>> accountTypes = accountTypesList
-      .map(
-        (e) => DropdownMenuItem<int>(
-          child: Text(e.name),
-          value: e.id,
-        ),
-      )
-      .toList();
-  addNewAccount(int accountType) {
-    Account newAccount = Account(
+
+  editAccount({required int accountType, required int id}) {
+    Account account = Account(
+        id: id,
         balance: double.parse(accountBalance.text),
         name: accountNameController.text,
         planned: double.parse(accountPlanned.text),
         typeId: accountType);
-    accountBox.put(newAccount);
+
+    accountBox.put(account);
     dashController.getData();
     Get.back();
     Get.snackbar(
       "Ok",
-      "Cuenta agregada",
-      icon: Icon(Icons.add, color: Colors.white),
+      "Cuenta Editada",
+      icon: Icon(Icons.edit, color: Colors.white),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
     );

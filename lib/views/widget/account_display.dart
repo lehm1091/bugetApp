@@ -12,10 +12,12 @@ class AccountDisplay extends StatefulWidget {
   Account account;
   Function onEdit;
   Function onDelete;
+  Function onDragAccept;
   AccountDisplay(
       {required this.account,
       required this.onEdit,
       required this.onDelete,
+      required this.onDragAccept,
       Key? key})
       : super(key: key);
 
@@ -78,39 +80,47 @@ class _AccountDisplayState extends State<AccountDisplay> {
                         width: 20,
                       ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 80,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: widget.account.typeId != 1 ? yellowColor : null,
-                      gradient: widget.account.typeId == 1
-                          ? LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              stops: getStops(),
-                              colors: getColors(),
-                            )
-                          : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.account.typeId == 1
-                            ? "${widget.account.balance.toStringAsFixed(0)}/${widget.account.planned.toStringAsFixed(0)}"
-                            : "${widget.account.balance.toStringAsFixed(0)}",
-                        style: TextStyle(fontSize: 12, color: getTextColor()),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 80,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: widget.account.typeId != 1 ? yellowColor : null,
+                        gradient: widget.account.typeId == 1
+                            ? LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                stops: getStops(),
+                                colors: getColors(),
+                              )
+                            : null,
+                      ),
+                      child: Center(
+                        child: Text(
+                          widget.account.typeId == 1
+                              ? "${widget.account.balance.toStringAsFixed(0)}/${widget.account.planned.toStringAsFixed(0)}"
+                              : "${widget.account.balance.toStringAsFixed(0)}",
+                          style: TextStyle(fontSize: 12, color: getTextColor()),
+                        ),
                       ),
                     ),
-                  ),
-                  if (!isFeedback)
-                    Container(
-                      margin: const EdgeInsets.all(2),
-                      child: Text(widget.account.name),
-                    ),
-                ],
+                    if (!isFeedback)
+                      Container(
+                        margin: const EdgeInsets.all(2),
+                        child: Text(
+                          widget.account.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w300,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               Container(
                 child: widget.account.showMenu
@@ -120,7 +130,7 @@ class _AccountDisplayState extends State<AccountDisplay> {
                           size: 20,
                         ),
                         onTap: () {
-                          widget.onDelete();
+                          widget.onEdit();
                         },
                       )
                     : SizedBox(width: 20),
@@ -163,12 +173,10 @@ class _AccountDisplayState extends State<AccountDisplay> {
               List<dynamic> accepted,
               List<dynamic> rejected,
             ) {
-              return roundedItem(false);
+              return gestureWrapped();
             },
             onAccept: (data) {
-              print(data.name);
-              data.balance = data.balance - 50.0;
-              widget.account.balance = widget.account.balance + 50.0;
+              widget.onDragAccept(data, widget.account);
               setState(() {});
             },
           );
