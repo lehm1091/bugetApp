@@ -1,6 +1,7 @@
 import 'package:finanzas_personales/main.dart';
 import 'package:finanzas_personales/model/account.dart';
 import 'package:finanzas_personales/objectbox.g.dart';
+import 'package:finanzas_personales/repository/AccountTypeRepository.dart';
 import 'package:finanzas_personales/views/new_account/new_account.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -10,11 +11,17 @@ class DashboardController extends GetxController {
   double totalExpended = 0;
   double totalPlanned = 0;
   double libre = 0;
+
+  double totalExpendedGroupA = 0;
+  double totalPlannedGroupA = 0;
+  double totalExpendedGroupB = 0;
+  double totalPlannedGroupB = 0;
+
   final accountBox = objectbox.store.box<Account>();
 
   List<Account> wallets = [];
-  List<Account> expends = [];
-
+  List<Account> expendsGroupA = [];
+  List<Account> expendsGroupB = [];
   @override
   Future<void> onInit() async {
     super.onInit();
@@ -23,11 +30,37 @@ class DashboardController extends GetxController {
 
   Future<void> getData() async {
     wallets = getWallets();
-    expends = getExpendedAccounts();
+    totalPlanned = 0;
+    totalExpended = 0;
+    expendsGroupA = getExpendsGroupA();
+    expendsGroupB = getExpendsGroupB();
   }
 
   List<Account> getAll() {
     return accountBox.getAll();
+  }
+
+  Future<void> resetBalances() async {
+    List<Account> lista = getAll();
+    lista.forEach((element) {
+      if (element.typeId == AccountTypeId.expendIdGroupA.value ||
+          element.typeId == AccountTypeId.expendIdGroupB.value) {
+        element.balance = 0.0;
+      }
+      if (element.typeId == AccountTypeId.walletId.value) {
+        element.balance = element.planned;
+      }
+    });
+
+    accountBox.putMany(lista);
+    await getData();
+    update();
+  }
+
+  Future<void> deleteAll() async {
+    accountBox.removeAll();
+    await getData();
+    update();
   }
 
   List<Account> getByAccountType(int type) {
@@ -45,16 +78,34 @@ class DashboardController extends GetxController {
     return wallets;
   }
 
-  List<Account> getExpendedAccounts() {
-    List<Account> expends = getByAccountType(1);
-    totalPlanned = 0;
-    totalExpended = 0;
-    expends.forEach((element) {
+  List<Account> getExpendsGroupA() {
+    List<Account> expendsGroupA =
+        getByAccountType(AccountTypeId.expendIdGroupA.value);
+    totalPlannedGroupA = 0;
+    totalExpendedGroupA = 0;
+    expendsGroupA.forEach((element) {
       totalPlanned += element.planned;
       totalExpended += element.balance;
+      totalPlannedGroupA += element.planned;
+      totalExpendedGroupA += element.balance;
     });
     update();
-    return expends;
+    return expendsGroupA;
+  }
+
+  List<Account> getExpendsGroupB() {
+    List<Account> expendsGroupB =
+        getByAccountType(AccountTypeId.expendIdGroupB.value);
+    totalPlannedGroupB = 0;
+    totalExpendedGroupB = 0;
+    expendsGroupB.forEach((element) {
+      totalPlanned += element.planned;
+      totalExpended += element.balance;
+      totalPlannedGroupB += element.planned;
+      totalExpendedGroupB += element.balance;
+    });
+    update();
+    return expendsGroupB;
   }
 
   RxList<Account> accountsList = <Account>[
@@ -64,6 +115,7 @@ class DashboardController extends GetxController {
     Account(balance: 40, name: "Prueba4", planned: 300.0, typeId: 1),
     Account(balance: 305, name: "Prueba5", planned: 300.0, typeId: 1)
   ].obs;
+
   onAddButtonPress(int accountType) {
     print("pressed");
 

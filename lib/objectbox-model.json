@@ -35,18 +35,73 @@
           "type": 6
         }
       ],
+      "relations": [
+        {
+          "id": "1:8444388186473723729",
+          "name": "movements",
+          "targetId": "2:4795105174811773723"
+        }
+      ]
+    },
+    {
+      "id": "2:4795105174811773723",
+      "lastPropertyId": "7:7826717817108584712",
+      "name": "Movement",
+      "properties": [
+        {
+          "id": "1:6715634523243968162",
+          "name": "total",
+          "type": 8
+        },
+        {
+          "id": "2:6466815438212888281",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "3:88133066248017546",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "4:7153867726491825934",
+          "name": "toAccountId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:3125017304694943687",
+          "relationTarget": "Account"
+        },
+        {
+          "id": "6:5038166749616400197",
+          "name": "date",
+          "type": 10
+        },
+        {
+          "id": "7:7826717817108584712",
+          "name": "fromAccountId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:2507110557791474098",
+          "relationTarget": "Account"
+        }
+      ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:7125413560799074345",
-  "lastIndexId": "0:0",
-  "lastRelationId": "0:0",
+  "lastEntityId": "2:4795105174811773723",
+  "lastIndexId": "3:2507110557791474098",
+  "lastRelationId": "1:8444388186473723729",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredIndexUids": [
+    2227327365898950886
+  ],
+  "retiredPropertyUids": [
+    8346561184496968783
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

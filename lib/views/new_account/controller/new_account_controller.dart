@@ -11,8 +11,8 @@ import 'package:get/get.dart';
 class NewAccountController extends GetxController {
   var dashController = Get.put(DashboardController());
   TextEditingController accountNameController = new TextEditingController();
-  TextEditingController accountPlanned = new TextEditingController(text: '0.0');
-  TextEditingController accountBalance = new TextEditingController(text: '0.0');
+  TextEditingController accountPlanned = new TextEditingController();
+  TextEditingController accountBalance = new TextEditingController();
 
   final accountBox = objectbox.store.box<Account>();
   List<DropdownMenuItem<int>> accountTypes = accountTypesList
@@ -25,17 +25,24 @@ class NewAccountController extends GetxController {
       .toList();
   addNewAccount(int accountType) {
     Account newAccount = Account(
-        balance: double.parse(accountBalance.text),
+        balance: accountBalance.text.isNotEmpty
+            ? double.parse(accountBalance.text)
+            : 0,
         name: accountNameController.text,
-        planned: double.parse(accountPlanned.text),
+        planned: accountPlanned.text.isNotEmpty
+            ? double.parse(accountPlanned.text)
+            : 0,
         typeId: accountType);
+    if (accountType == 4) {
+      newAccount.planned = newAccount.balance;
+    }
     accountBox.put(newAccount);
     dashController.getData();
     Get.back();
     Get.snackbar(
       "Ok",
       "Cuenta agregada",
-      icon: Icon(Icons.add, color: Colors.white),
+      icon: const Icon(Icons.check, color: Colors.white),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
     );

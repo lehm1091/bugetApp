@@ -30,7 +30,7 @@ class EditAccountController extends GetxController {
     Get.snackbar(
       "Ok",
       "Cuenta Editada",
-      icon: Icon(Icons.edit, color: Colors.white),
+      icon: Icon(Icons.check, color: Colors.white),
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green,
     );

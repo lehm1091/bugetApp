@@ -14,6 +14,7 @@ import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'model/account.dart';
+import 'model/movement.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -50,6 +51,54 @@ final _entities = <ModelEntity>[
             type: 6,
             flags: 0)
       ],
+      relations: <ModelRelation>[
+        ModelRelation(
+            id: const IdUid(1, 8444388186473723729),
+            name: 'movements',
+            targetId: const IdUid(2, 4795105174811773723))
+      ],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(2, 4795105174811773723),
+      name: 'Movement',
+      lastPropertyId: const IdUid(7, 7826717817108584712),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 6715634523243968162),
+            name: 'total',
+            type: 8,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(2, 6466815438212888281),
+            name: 'description',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(3, 88133066248017546),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(4, 7153867726491825934),
+            name: 'toAccountId',
+            type: 11,
+            flags: 520,
+            indexId: const IdUid(1, 3125017304694943687),
+            relationTarget: 'Account'),
+        ModelProperty(
+            id: const IdUid(6, 5038166749616400197),
+            name: 'date',
+            type: 10,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(7, 7826717817108584712),
+            name: 'fromAccountId',
+            type: 11,
+            flags: 520,
+            indexId: const IdUid(3, 2507110557791474098),
+            relationTarget: 'Account')
+      ],
       relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
 ];
@@ -74,13 +123,13 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(1, 7125413560799074345),
-      lastIndexId: const IdUid(0, 0),
-      lastRelationId: const IdUid(0, 0),
+      lastEntityId: const IdUid(2, 4795105174811773723),
+      lastIndexId: const IdUid(3, 2507110557791474098),
+      lastRelationId: const IdUid(1, 8444388186473723729),
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
-      retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredIndexUids: const [2227327365898950886],
+      retiredPropertyUids: const [8346561184496968783],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -90,7 +139,8 @@ ModelDefinition getObjectBoxModel() {
     Account: EntityDefinition<Account>(
         model: _entities[0],
         toOneRelations: (Account object) => [],
-        toManyRelations: (Account object) => {},
+        toManyRelations: (Account object) =>
+            {RelInfo<Account>.toMany(1, object.id): object.movements},
         getId: (Account object) => object.id,
         setId: (Account object, int id) {
           object.id = id;
@@ -120,7 +170,49 @@ ModelDefinition getObjectBoxModel() {
                   const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0),
               typeId:
                   const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+          InternalToManyAccess.setRelInfo(object.movements, store,
+              RelInfo<Account>.toMany(1, object.id), store.box<Account>());
+          return object;
+        }),
+    Movement: EntityDefinition<Movement>(
+        model: _entities[1],
+        toOneRelations: (Movement object) =>
+            [object.toAccount, object.fromAccount],
+        toManyRelations: (Movement object) => {},
+        getId: (Movement object) => object.id,
+        setId: (Movement object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Movement object, fb.Builder fbb) {
+          final descriptionOffset = fbb.writeString(object.description);
+          fbb.startTable(8);
+          fbb.addFloat64(0, object.total);
+          fbb.addOffset(1, descriptionOffset);
+          fbb.addInt64(2, object.id);
+          fbb.addInt64(3, object.toAccount.targetId);
+          fbb.addInt64(5, object.date.millisecondsSinceEpoch);
+          fbb.addInt64(6, object.fromAccount.targetId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
 
+          final object = Movement(
+              id: const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
+              date: DateTime.fromMillisecondsSinceEpoch(
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)))
+            ..total =
+                const fb.Float64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..description = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 6, '');
+          object.toAccount.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
+          object.toAccount.attach(store);
+          object.fromAccount.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          object.fromAccount.attach(store);
           return object;
         })
   };
@@ -147,4 +239,34 @@ class Account_ {
   /// see [Account.typeId]
   static final typeId =
       QueryIntegerProperty<Account>(_entities[0].properties[4]);
+
+  /// see [Account.movements]
+  static final movements =
+      QueryRelationToMany<Account, Movement>(_entities[0].relations[0]);
+}
+
+/// [Movement] entity fields to define ObjectBox queries.
+class Movement_ {
+  /// see [Movement.total]
+  static final total =
+      QueryDoubleProperty<Movement>(_entities[1].properties[0]);
+
+  /// see [Movement.description]
+  static final description =
+      QueryStringProperty<Movement>(_entities[1].properties[1]);
+
+  /// see [Movement.id]
+  static final id = QueryIntegerProperty<Movement>(_entities[1].properties[2]);
+
+  /// see [Movement.toAccount]
+  static final toAccount =
+      QueryRelationToOne<Movement, Account>(_entities[1].properties[3]);
+
+  /// see [Movement.date]
+  static final date =
+      QueryIntegerProperty<Movement>(_entities[1].properties[4]);
+
+  /// see [Movement.fromAccount]
+  static final fromAccount =
+      QueryRelationToOne<Movement, Account>(_entities[1].properties[5]);
 }

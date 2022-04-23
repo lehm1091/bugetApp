@@ -1,6 +1,10 @@
 import 'package:finanzas_personales/model/account.dart';
+import 'package:finanzas_personales/model/movement.dart';
+import 'package:finanzas_personales/repository/AccountTypeRepository.dart';
+import 'package:finanzas_personales/views/movements/movements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 const Color orangeColor = Color.fromARGB(255, 255, 142, 0);
 const Color greenColor = Color.fromARGB(255, 6, 211, 152);
@@ -49,7 +53,7 @@ class _AccountDisplayState extends State<AccountDisplay> {
   }
 
   Color getTextColor() {
-    if (widget.account.typeId == 4) {
+    if (widget.account.typeId == AccountTypeId.walletId.value) {
       return Colors.black;
     }
     if (widget.account.balance > widget.account.planned) {
@@ -61,14 +65,14 @@ class _AccountDisplayState extends State<AccountDisplay> {
 
   Widget roundedItem(bool isFeedback) {
     return Container(
-      width: 120,
+      width: 95,
       child: Center(
         child: Container(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                child: widget.account.showMenu
+                child: widget.account.showMenu && !isFeedback
                     ? GestureDetector(
                         onTap: () => widget.onDelete(),
                         child: Icon(
@@ -84,13 +88,30 @@ class _AccountDisplayState extends State<AccountDisplay> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    if (!isFeedback)
+                      Container(
+                        margin: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          widget.account.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
                     Container(
                       height: 80,
                       width: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: widget.account.typeId != 1 ? yellowColor : null,
-                        gradient: widget.account.typeId == 1
+                        color: widget.account.typeId ==
+                                AccountTypeId.walletId.value
+                            ? yellowColor
+                            : null,
+                        gradient: widget.account.typeId ==
+                                    AccountTypeId.expendIdGroupA.value ||
+                                widget.account.typeId ==
+                                    AccountTypeId.expendIdGroupB.value
                             ? LinearGradient(
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
@@ -100,22 +121,37 @@ class _AccountDisplayState extends State<AccountDisplay> {
                             : null,
                       ),
                       child: Center(
-                        child: Text(
-                          widget.account.typeId == 1
-                              ? "${widget.account.balance.toStringAsFixed(0)}/${widget.account.planned.toStringAsFixed(0)}"
-                              : "${widget.account.balance.toStringAsFixed(0)}",
-                          style: TextStyle(fontSize: 12, color: getTextColor()),
+                        child: Icon(
+                          widget.account.typeId == AccountTypeId.walletId.value
+                              ? Icons.wallet
+                              : Icons.monetization_on_outlined,
+                          color: getTextColor(),
                         ),
                       ),
                     ),
                     if (!isFeedback)
                       Container(
-                        margin: const EdgeInsets.all(2),
                         child: Text(
-                          widget.account.name,
+                          widget.account.balance.toStringAsFixed(1),
                           style: const TextStyle(
-                            fontWeight: FontWeight.w300,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                             overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    if (!isFeedback)
+                      Visibility(
+                        visible: widget.account.typeId !=
+                            AccountTypeId.walletId.value,
+                        child: Container(
+                          child: Text(
+                            widget.account.planned.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w300,
+                              fontSize: 12,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                       ),
@@ -156,12 +192,15 @@ class _AccountDisplayState extends State<AccountDisplay> {
         });
       },
       child: roundedItem(false),
+      onDoubleTap: () {
+        Get.to(() => Movements(toAccount: widget.account));
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return (widget.account.typeId == 4)
+    return (widget.account.typeId == AccountTypeId.walletId.value)
         ? Draggable<Account>(
             data: widget.account,
             child: gestureWrapped(),

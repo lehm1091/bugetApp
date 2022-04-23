@@ -72,25 +72,25 @@ class EditAccount extends GetView<EditAccountController> {
             //     ],
             //   ),
             // ),
-            if (account.typeId != 4)
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: controller.accountPlanned,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Planeado',
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+
+            Container(
+              margin: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller.accountPlanned,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Planeado',
                       ),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
             Container(
               margin: const EdgeInsets.all(10),
