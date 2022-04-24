@@ -1,5 +1,6 @@
 import 'package:finanzas_personales/main.dart';
 import 'package:finanzas_personales/model/account.dart';
+import 'package:finanzas_personales/model/movement.dart';
 import 'package:finanzas_personales/objectbox.g.dart';
 import 'package:finanzas_personales/repository/AccountTypeRepository.dart';
 import 'package:finanzas_personales/views/new_account/new_account.dart';
@@ -18,7 +19,7 @@ class DashboardController extends GetxController {
   double totalPlannedGroupB = 0;
 
   final accountBox = objectbox.store.box<Account>();
-
+  final movementBox = objectbox.store.box<Movement>();
   List<Account> wallets = [];
   List<Account> expendsGroupA = [];
   List<Account> expendsGroupB = [];
@@ -126,8 +127,39 @@ class DashboardController extends GetxController {
 
   void removeAccount(Account item) {
     print("removed");
-    accountBox.remove(item.id);
+    // accountBox.remove(item.id);
+    if (item.typeId != AccountTypeId.walletId.value) {
+      List<Movement> movimientos = movementBox
+          .getAll()
+          .where((element) => element.toAccount.targetId == item.id)
+          .toList();
+      movimientos.forEach((element) {
+        element.fromAccount.target!.balance =
+            element.fromAccount.target!.balance + element.total;
+        accountBox.put(element.fromAccount.target!);
+      });
+      accountBox.remove(item.id);
+      movementBox.removeMany(movimientos.map((e) => e.id).toList());
+      print("removed");
+      print("removed " + movimientos.length.toString());
+    } else {
+      List<Movement> movimientos = movementBox
+          .getAll()
+          .where((element) => element.fromAccount.targetId == item.id)
+          .toList();
+      movimientos.forEach((element) {
+        element.toAccount.target!.balance =
+            element.toAccount.target!.balance - element.total;
+        accountBox.put(element.toAccount.target!);
+      });
+      accountBox.remove(item.id);
+      movementBox.removeMany(movimientos.map((e) => e.id).toList());
+      print("removed");
+      print("removed " + movimientos.length.toString());
+    }
+
     getData();
+
     update();
   }
 }

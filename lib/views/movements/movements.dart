@@ -2,9 +2,11 @@ import 'dart:ffi';
 
 import 'package:finanzas_personales/model/account.dart';
 import 'package:finanzas_personales/model/account_type.dart';
+import 'package:finanzas_personales/model/movement.dart';
 import 'package:finanzas_personales/views/movements/controller/movements_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class Movements extends GetView<MovementController> {
   Account? toAccount;
@@ -13,9 +15,6 @@ class Movements extends GetView<MovementController> {
       controller.idAccount = toAccount!.id;
       controller.movements = controller.getByToAccountId(toAccount!.id);
     }
-
-    print("constructor");
-    print(toAccount!.id);
   }
   var _controller = Get.put(MovementController());
   Widget stackBehindDismiss() {
@@ -30,6 +29,15 @@ class Movements extends GetView<MovementController> {
     );
   }
 
+  Widget getSubtitle(Movement movement) {
+    var subTitle = DateFormat("dd/MM").format(movement.date);
+    if (movement!.description != null && movement!.description!.isNotEmpty) {
+      subTitle = subTitle + " | " + movement!.description;
+    }
+
+    return Text(subTitle);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +49,7 @@ class Movements extends GetView<MovementController> {
       ),
       body: GetBuilder<MovementController>(builder: (_mc) {
         print("buider");
+
         return Container(
           child: controller.isLoading.value
               ? const Center(
@@ -55,16 +64,25 @@ class Movements extends GetView<MovementController> {
                           background: stackBehindDismiss(),
                           key: ObjectKey(controller.movements[index]),
                           child: ListTile(
-                            leading: Icon(Icons.move_down),
-                            trailing: Text(
-                              "${controller.movements[index].total}",
-                              style: TextStyle(color: Colors.red, fontSize: 15),
-                            ),
-                            subtitle: Text(
-                                "${controller.movements[index].description}"),
-                            title: Text(
-                                "${controller.movements[index].fromAccount.target?.name} > ${controller.movements[index].toAccount.target?.name} "),
-                          ),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 10),
+                              leading: Icon(Icons.move_down),
+                              trailing: Text(
+                                "${controller.movements[index].total}",
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 15),
+                              ),
+                              subtitle:
+                                  getSubtitle(controller.movements[index]),
+                              title: Row(
+                                children: [
+                                  Text(
+                                      "${controller.movements[index].fromAccount.target?.name}"),
+                                  Icon(Icons.arrow_right),
+                                  Text(
+                                      "${controller.movements[index].toAccount.target?.name}")
+                                ],
+                              )),
                           onDismissed: (direction) async {
                             var item = controller.movements[index];
 

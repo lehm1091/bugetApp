@@ -100,8 +100,8 @@ class _AccountDisplayState extends State<AccountDisplay> {
                         ),
                       ),
                     Container(
-                      height: 80,
-                      width: 80,
+                      height: 60,
+                      width: 60,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: widget.account.typeId ==
