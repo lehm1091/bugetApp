@@ -8,6 +8,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
+  RxBool isEditingModeActive = false.obs;
+  int distanceMoved = 0;
+  final listViewKey = GlobalKey();
+  final ScrollController scroller = ScrollController();
   double totalWallets = 0;
   double totalExpended = 0;
   double totalPlanned = 0;
@@ -160,6 +164,20 @@ class DashboardController extends GetxController {
 
     getData();
 
+    update();
+  }
+
+  setShowMenuTo(bool show) {
+    isEditingModeActive.value = !isEditingModeActive.value;
+    wallets.forEach((element) {
+      element.showMenu = false;
+    });
+    expendsGroupA.forEach((element) {
+      element.showMenu = false;
+    });
+    expendsGroupB.forEach((element) {
+      element.showMenu = false;
+    });
     update();
   }
 }

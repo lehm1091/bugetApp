@@ -1,3 +1,4 @@
+import 'package:finanzas_personales/views/backup/backup.dart';
 import 'package:finanzas_personales/views/dashboard/controller/dashboard_controller.dart';
 import 'package:finanzas_personales/views/movements/movements.dart';
 import 'package:flutter/material.dart';
@@ -90,6 +91,13 @@ class NavBar extends StatelessWidget {
             title: Text('Historial de movimientos'),
             onTap: () async {
               Get.to(() => Movements());
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.backup),
+            title: Text('Backups'),
+            onTap: () async {
+              Get.to(() => Backup());
             },
           ),
         ],

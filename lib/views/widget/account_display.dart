@@ -17,11 +17,15 @@ class AccountDisplay extends StatefulWidget {
   Function onEdit;
   Function onDelete;
   Function onDragAccept;
+  Function onDragUpdate;
+  Function onLongPress;
   AccountDisplay(
       {required this.account,
       required this.onEdit,
       required this.onDelete,
       required this.onDragAccept,
+      required this.onDragUpdate,
+      required this.onLongPress,
       Key? key})
       : super(key: key);
 
@@ -65,25 +69,13 @@ class _AccountDisplayState extends State<AccountDisplay> {
 
   Widget roundedItem(bool isFeedback) {
     return Container(
-      width: 95,
+      margin: EdgeInsets.all(2),
+      width: 70,
       child: Center(
         child: Container(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                child: widget.account.showMenu && !isFeedback
-                    ? GestureDetector(
-                        onTap: () => widget.onDelete(),
-                        child: Icon(
-                          Icons.close,
-                          size: 20,
-                        ),
-                      )
-                    : SizedBox(
-                        width: 20,
-                      ),
-              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -94,14 +86,15 @@ class _AccountDisplayState extends State<AccountDisplay> {
                         child: Text(
                           widget.account.name,
                           style: const TextStyle(
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                     Container(
-                      height: 60,
-                      width: 60,
+                      height: 65,
+                      width: 65,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: widget.account.typeId ==
@@ -120,13 +113,54 @@ class _AccountDisplayState extends State<AccountDisplay> {
                               )
                             : null,
                       ),
-                      child: Center(
-                        child: Icon(
-                          widget.account.typeId == AccountTypeId.walletId.value
-                              ? Icons.wallet
-                              : Icons.monetization_on_outlined,
-                          color: getTextColor(),
-                        ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Icon(
+                              widget.account.typeId ==
+                                      AccountTypeId.walletId.value
+                                  ? Icons.wallet
+                                  : Icons.monetization_on_outlined,
+                              color: getTextColor(),
+                              size: 35,
+                            ),
+                          ),
+                          if (widget.account.showMenu && !isFeedback)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: ShapeDecoration(
+                                    shape: CircleBorder(), color: Colors.black),
+                                child: GestureDetector(
+                                  onTap: () => widget.onDelete(),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (widget.account.showMenu && !isFeedback)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: ShapeDecoration(
+                                    shape: CircleBorder(), color: Colors.black),
+                                child: GestureDetector(
+                                  child: Icon(Icons.edit,
+                                      size: 18, color: Colors.white),
+                                  onTap: () {
+                                    widget.onEdit();
+                                  },
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     if (!isFeedback)
@@ -135,7 +169,7 @@ class _AccountDisplayState extends State<AccountDisplay> {
                           widget.account.balance.toStringAsFixed(1),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontSize: 12,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -158,19 +192,6 @@ class _AccountDisplayState extends State<AccountDisplay> {
                   ],
                 ),
               ),
-              Container(
-                child: widget.account.showMenu
-                    ? GestureDetector(
-                        child: Icon(
-                          Icons.edit,
-                          size: 20,
-                        ),
-                        onTap: () {
-                          widget.onEdit();
-                        },
-                      )
-                    : SizedBox(width: 20),
-              ),
             ],
           ),
         ),
@@ -190,6 +211,7 @@ class _AccountDisplayState extends State<AccountDisplay> {
         setState(() {
           widget.account.showMenu = !widget.account.showMenu;
         });
+        widget.onLongPress(widget.account.showMenu);
       },
       child: roundedItem(false),
       onDoubleTap: () {
@@ -205,7 +227,9 @@ class _AccountDisplayState extends State<AccountDisplay> {
             data: widget.account,
             child: gestureWrapped(),
             feedback: roundedItem(true),
-          )
+            onDragUpdate: (DragUpdateDetails details) {
+              widget.onDragUpdate(details);
+            })
         : DragTarget<Account>(
             builder: (
               BuildContext context,

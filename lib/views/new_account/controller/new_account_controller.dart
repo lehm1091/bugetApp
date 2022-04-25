@@ -13,6 +13,7 @@ class NewAccountController extends GetxController {
   TextEditingController accountNameController = new TextEditingController();
   TextEditingController accountPlanned = new TextEditingController();
   TextEditingController accountBalance = new TextEditingController();
+  RxBool isLoading = false.obs;
 
   final accountBox = objectbox.store.box<Account>();
   List<DropdownMenuItem<int>> accountTypes = accountTypesList
@@ -24,6 +25,11 @@ class NewAccountController extends GetxController {
       )
       .toList();
   addNewAccount(int accountType) {
+    if (isLoading.value) {
+      print("guardado en progreso");
+      return;
+    }
+    isLoading.value = true;
     Account newAccount = Account(
         balance: accountBalance.text.isNotEmpty
             ? double.parse(accountBalance.text)
@@ -39,6 +45,7 @@ class NewAccountController extends GetxController {
     accountBox.put(newAccount);
     dashController.getData();
     Get.back();
+    isLoading.value = false;
     Get.snackbar(
       "Ok",
       "Cuenta agregada",

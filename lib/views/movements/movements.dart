@@ -31,8 +31,8 @@ class Movements extends GetView<MovementController> {
 
   Widget getSubtitle(Movement movement) {
     var subTitle = DateFormat("dd/MM").format(movement.date);
-    if (movement!.description != null && movement!.description!.isNotEmpty) {
-      subTitle = subTitle + " | " + movement!.description;
+    if (movement.description.isNotEmpty) {
+      subTitle = subTitle + " | " + movement.description;
     }
 
     return Text(subTitle);

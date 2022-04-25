@@ -1,3 +1,4 @@
+
 import 'package:finanzas_personales/repository/object_box.dart';
 import 'package:finanzas_personales/views/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   objectbox = await ObjectBox.create();
+
   runApp(MyApp());
 }
 
